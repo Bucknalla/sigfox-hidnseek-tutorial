@@ -1,4 +1,4 @@
-<div style="text-align:center"><img src ="http://makers.sigfox.com/img/sigfox-logo-white.svg" /></div>
+<div style="text-align:center"><img src ="http://makers.sigfox.com/img/sigfox-logo-black.svg" /></div>
 
 # Sigfox HidnSeek Tutorial
 This is a Sigfox tutorial for getting started with the [HidnSeek GPS Locator](https://www.hidnseek.fr/).
@@ -19,3 +19,7 @@ This tutorial assumes that you are familiar with the Arduino IDE (https://www.ar
 ## Detecting Movement
 
 #### Using the Accelerometer
+
+## Learn More
+
+If you're interested in finding out more about Sigfox, LPWAN and the dev kits that are available, you can head to our [website](http://makers.sigfox.com) to learn more!
