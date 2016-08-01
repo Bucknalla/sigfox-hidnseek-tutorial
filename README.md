@@ -1,18 +1,17 @@
 <p align="center"><img src ="http://makers.sigfox.com/img/sigfox-logo-black.svg" width="300"></p>
 
-# Sigfox HidnSeek Tutorial
-This is a Sigfox tutorial for getting started with the [HidnSeek GPS Locator](https://www.hidnseek.fr/). This is a device based upon the ATMega328p with features including:
+# SIGFOX HidnSeek Tutorial
+This is a SIGFOX tutorial for getting started with the [HidnSeek GPS Locator](https://www.hidnseek.fr/). This is a device based upon the ATMega328p with features including:
 
 <p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/hidnseek.png" width="300"></p>
-
 
 * GPS Locality
 * 3 Axis Accelerometer
 * Temperature and Pressure Sensors
 * [SIGFOX](https://sigfox.com) Enabled Module (TD 1207)
-* Arduino compatible
+* Arduino IDE Compatible
 
-Using the Sigfox network, the device can broadcast it's payload to the Sigfox Cloud, where it can be interpreted by a user's server allowing for both Uplink and Downlink messages to be sent. As the network is currently undergoing global rollout, please check our [coverage map](http://www.sigfox.com/coverage) for details on availability in your region!
+Using the SIGFOX network, the device can broadcast it's payload to the SIGFOX Cloud, where it can be interpreted by a user's server allowing for both Uplink and Downlink messages to be sent. As the network is currently undergoing global rollout, please check our [coverage map](http://www.sigfox.com/coverage) for details on availability in your region!
 
 ## Getting started
 This tutorial assumes that you are familiar with the Arduino IDE (https://www.arduino.cc/en/Main/Software) and are running at least version **1.6.4**.
@@ -23,17 +22,36 @@ This tutorial assumes that you are familiar with the Arduino IDE (https://www.ar
 
 #### Installing Drivers
 
+First of all, you will need to add the board to the Arduino IDE using the **Additional Boards Manager**.
+
+You can find this by clicking on the Arduino IDE, *Preferences* button. You'll see a text field titled, *Additional Boards Manager URLs*. Within this field you should add the following link:
+
+https://hidnseek.github.io/hidnseek/package_hidnseek_boot_index.json
+
+This allows the Arduino IDE to automatically find the index files required to build for the HidnSeek Device.
+
 #### Installing Boards
 
 ## Getting a GPS Fix
 
-This example demonstrates how you can use the HidnSeek's GPS to broadcast the device's location at intervals of once an hour. This can be increased up to approximately 6 times an hour (140~ messages per day) based upon the limitations of the EU Regulations (ETSI 300-220) on the unlicensed 868MHz frequency.
-#### Blinking whilst Acquiring
+This example demonstrates how you can use the HidnSeek's GPS to broadcast the device's location at intervals of once an hour over the SIGFOX network. This can be increased up to approximately 6 times an hour (140~ messages per day) based upon the limitations of the EU Regulations (ETSI 300-220) on the unlicensed 868MHz frequency.
+
+We'll use the red LED on board to indicate when the device is transmitting it's location.
+
+#### Outputting to the Serial Terminal
+
+For convenience, we'll output the GPS location to the Arduino's built-in Serial Monitor for the time being. You can launch the serial monitor by selecting *Tools*, then *Serial Monitor* from the Arduino IDE menu.
+
+#### Retrieving Data from the SIGFOX Cloud
+
+This step is slightly more complicated as we're required to set up an server to communicate with the SIGFOX Cloud and to retrieve any of the messages sent by the HidnSeek.
 
 ## Detecting Movement
 
 #### Using the Accelerometer
 
+This next example uses the
+
 ## Learn More
 
-If you're interested in finding out more about Sigfox, LPWAN and the dev kits that are available, you can head to our [website](http://makers.sigfox.com) to learn more!
+If you're interested in finding out more about SIGFOX, our technology and the dev kits that are available, you can head to our [website](http://makers.sigfox.com) to learn more!
