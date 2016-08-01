@@ -8,7 +8,7 @@
 */
 
 #define txSigfox         5     // PD5 TX Serial to Sigfox modem
-#define bluLEDpin        6     // PD6 Piezzo Output
+// #define bluLEDpin        6     // PD6 Piezzo Output
 #define redLEDpin        7     // PD7 Red LED Status
 #define rxSigfox         8     // PB0 RX Serial from Sigfox modem
 #define ACCEL_MODE       2
@@ -69,7 +69,7 @@ void loop()
     }
     else {
       if (timestamp-- == 0) HidnSeek.setSupply(false);
-      ledColor = bluLEDpin;
+      // ledColor = bluLEDpin;
     }
     digitalWrite(ledColor, HIGH);
     delay(50);
