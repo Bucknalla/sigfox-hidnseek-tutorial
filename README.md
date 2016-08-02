@@ -22,15 +22,17 @@ This tutorial assumes that you are familiar with the Arduino IDE (https://www.ar
 
 #### Installing Drivers
 
-First of all, you will need to add the board to the Arduino IDE using the **Additional Boards Manager**.
-
-You can find this by clicking on the Arduino IDE, *Preferences* button. You'll see a text field titled, *Additional Boards Manager URLs*. Within this field you should add the following link:
+First of all, you will need to add the board to the Arduino IDE using the **Additional Boards Manager**. You can find this by clicking on the Arduino IDE, *Preferences* button. You'll see a text field titled, *Additional Boards Manager URLs*. Within this field you should add the following link:
 
 https://hidnseek.github.io/hidnseek/package_hidnseek_boot_index.json
 
 This allows the Arduino IDE to automatically find the index files required to build for the HidnSeek Device.
 
 #### Installing Boards
+
+You will now need to install the board. You can do this by navigating to the **Board Manager**, located under *Tools*, then *Board*. Locate and install USBaspLoader HidnSeek.
+
+Restart the Arduino IDE and check that the board has correctly installed.
 
 ## Getting a GPS Fix
 
