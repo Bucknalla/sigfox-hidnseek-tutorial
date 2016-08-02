@@ -34,6 +34,24 @@ You will now need to install the board. You can do this by navigating to the **B
 
 Restart the Arduino IDE and check that the board has correctly installed.
 
+<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/hidnseek_board.png" width="300"></p>
+
+#### Preparing the Board for Uploading
+
+In order to prepare the HidnSeek for the uploading of a sketch, **the board must be placed into DFU mode (Device Firmware Update)**. This can be activated by one of two different ways.
+
+##### 1. Accelerometer
+
+Using the 3-Axis Accelerometer within the device, it is possible to place the device into DFU mode.
+
+##### 2. Shorting R & G Pins
+
+If you open the case of the HidnSeek (There are 4 plastic connectors around the edge of the device), you will notice a bank of exposed connections. Short the connections labelled R & G and the device will enter DFU mode.
+
+<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/hidnseek_board.png" width="300"></p>
+
+Once the device has entered DFU mode, a red LED will flash rapidly for approximately 30 seconds. During this period of time, a new sketch may be uploaded to the device. If you miss this window, you will have to repeat the process for entering DFU mode.
+
 ## Getting a GPS Fix
 
 This example demonstrates how you can use the HidnSeek's GPS to broadcast the device's location at intervals of once an hour over the SIGFOX network. This can be increased up to approximately 6 times an hour (140~ messages per day) based upon the limitations of the EU Regulations (ETSI 300-220) on the unlicensed 868MHz frequency.
