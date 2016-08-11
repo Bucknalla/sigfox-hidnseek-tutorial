@@ -1,5 +1,5 @@
-#include <SoftwareSerial.h>
 #include <HidnSeek.h>
+#include <SoftwareSerial.h>
 #include <TinyGPS.h>
 #include "definition.h" // Required for GPS Commands, etc.
 
@@ -7,7 +7,7 @@ HidnSeek HidnSeek(txSigfox, rxSigfox);
 
 TinyGPS gps;
 
-void initGPIO()
+void initGPIO() // Required to initialise the battery and other GPIO
 {
   // Set output to 0 for not used Pads
   PORTB = (DIGITAL_PULLUP >> 8) & 0xff;
@@ -23,6 +23,8 @@ void serialString (PGM_P s) { // Used to send commands to the GPS
   while ((c = pgm_read_byte(s++)) != 0)
     Serial.print(c);
 }
+
+/* GPS Code */
 
 void gpsCmd (PGM_P s) { // Allows sending of commands directly to the GPS
   int XOR = 0;
@@ -48,17 +50,15 @@ bool gpsInit() { // Checks the state of the serial port and set the GPS to outpu
     }
     delay(100);
   }
-
   if (GPSready) {
     gpsCmd(PSTR(PMTK_SET_NMEA_OUTPUT));
     gpsCmd(PSTR(PMTK_SET_NMEA_UPDATE_1HZ));   // 1 Hz update rate
   } else digitalWrite(rstPin, LOW);
-
   return GPSready;
 }
 
-
-bool gpsProcess() {
+bool gpsProcess() { // Main function for collating and preparing GPS data
+  Serial.println("Generating Payload");
   boolean newGpsData = false;
   boolean newSerialData = false;
   float distance;
@@ -71,7 +71,7 @@ bool gpsProcess() {
       newSerialData = true;
       waitime = 100;
       start = millis();
-      redLEDon;
+      blueLEDon;
     }
     while (Serial.available())
     {
@@ -129,7 +129,7 @@ bool gpsProcess() {
 
   printData(newGpsData); // For debug purpose this use 2Ko of flash program
 
-  redLEDoff;
+  blueLEDoff;
   return newSerialData;
 }
 
@@ -138,7 +138,7 @@ void gpsStandby() { // Function to place the GPS into standby mode
   digitalWrite(rstPin, LOW);
 }
 
-void print_date() // Collects date information from the GPS
+void print_date() // Collects date & time from the GPS and outputs it to serial
 {
   char sz[24];
   sprintf(sz, "%02d/%02d/%02d %02d:%02d:%02d ",
@@ -146,7 +146,7 @@ void print_date() // Collects date information from the GPS
   Serial.print(sz);
 }
 
-void printData(bool complete) {
+void printData(bool complete) { // Collects GPS measurements and outputs the data to serial
   print_date();
   serialString(PSTR("fix="));
   Serial.print(fix_age);
@@ -170,7 +170,91 @@ void printData(bool complete) {
   Serial.print(noSat);
   serialString(PSTR(", syncSat="));
   Serial.println(syncSat);
+
 }
+
+void makePayload() { // Creates the Payload required for the Sigfox message
+  uint8_t cap;
+  if (sat > 3) {
+    if (alt > 4096) alt = (uint16_t)(alt / 16) + 3840; // 16m step after 4096m
+    if (alt > 8191) alt = 8191;                        // 69632m is the new limit ;)
+
+    if (spd > 127) spd = (uint16_t)(spd / 16) + 94; // 16Km/h step after 127Km/h
+    else if (spd > 90) spd = (uint16_t)(spd / 3) + 60; // 3Km/h step after 90Km/h
+    if (spd > 126) spd = 127;      // limit is 528Km/h
+    cap = (gps.course() / 90) % 4;
+  } else cap = (accelPosition < 3) ? accelPosition : 3;
+
+  p.cpx = (uint32_t) alt << 19;
+  p.cpx |= (uint32_t) spd << 12; // send in Km/h
+  p.cpx |= (uint32_t) cap << 10;  // send N/E/S/W
+  p.cpx |= (uint32_t) ( 127 & batteryPercent) << 3; // bat (7bits)
+  if (sat > 8) sat = 8;
+  p.cpx |= (uint32_t) 3 & (sat / 4); // sat range is 0 to 14
+}
+
+void decodePayload() { //
+  unsigned int alt_ = p.cpx >> 19;
+  unsigned int cap_ = (p.cpx >> 10) & 3;
+  unsigned int spd_ = (p.cpx >> 12) & 127;
+  unsigned int bat_ = (p.cpx >> 3) & 127;
+  unsigned int mod_ = p.cpx & 7;
+  print_date();
+  serialString(PSTR("msg="));
+  Serial.print(MsgCount);
+  serialString(PSTR(" lat="));
+  Serial.print(p.lat, 7);
+  serialString(PSTR(", lon="));
+  Serial.print(p.lon, 7);
+  serialString(PSTR(", alt="));
+  Serial.print(alt_);
+  serialString(PSTR(", cap="));
+  Serial.print(cap_);
+  serialString(PSTR(", spd="));
+  Serial.print(spd_);
+  serialString(PSTR(", bat="));
+  Serial.print(bat_);
+  serialString(PSTR(", mode="));
+  Serial.println(mod_);
+}
+
+/* SIGFOX Code */
+
+bool initSigFox() {
+  serialString(PSTR("SigFox: "));
+  unsigned long previousMillis = millis();
+  while ((uint16_t) (millis() - previousMillis) < 6000) {
+    if (HidnSeek.begin() == 3) {
+      Serial.print(HidnSeek.getID(), HEX);
+      return true;
+    }
+    else delay(200);
+  }
+  serialString(PSTR("Fail\r\n"));
+  return false;
+}
+
+void sendSigFox() {
+
+  if(HidnSeek.isReady()){
+    Serial.print("Sigfox is ready...");
+    makePayload();
+
+    previous_lat = p.lat;
+    previous_lon = p.lon;
+    decodePayload();
+    if(HidnSeek.send(&p, sizeof(p))){
+      redLEDon;
+       Serial.println("Successful...");
+       delay(500);
+       redLEDoff;
+    }
+    else Serial.println("Message Failed...");
+  }
+  else Serial.println("Sigfox not ready...");
+}
+
+/* Main Project Code */
 
 void setup()
 {
@@ -181,12 +265,17 @@ void setup()
 
   Serial.begin(9600);
 
-  Serial.print("GPS Example Sketch ");
+  Serial.print("GPS Example Sketch, TinyGPS Version - ");
   Serial.print(TinyGPS::library_version());
+  Serial.println();
+
+  if (initSigFox()) { // Checks if the SIGFOX Module is connected & functioning
+      delay(500);
+  }
 
   if (GPSactive = gpsInit()) {
-    gpsCmd(PSTR(PMTK_VERSION));
-//    flashRed(1);
+      Serial.println("GPS initialised...");
+      gpsCmd(PSTR(PMTK_VERSION));
   }
 }
 
@@ -197,17 +286,8 @@ void loop()
   delay(5000);
   if (newdata = gpsProcess())
   {
-    float flat, flon;
-    unsigned long age;
-    gps.f_get_position(&flat, &flon, &age);
-    Serial.print("LAT=");
-    Serial.print(flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6);
-    Serial.print(" LON=");
-    Serial.print(flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6);
-    Serial.print(" SAT=");
-    Serial.print(gps.satellites() == TinyGPS::GPS_INVALID_SATELLITES ? 0 : gps.satellites());
-    Serial.print(" PREC=");
-    Serial.print(gps.hdop() == TinyGPS::GPS_INVALID_HDOP ? 0 : gps.hdop());
+      makePayload();
+      sendSigFox();
   }
   delay(5000);
 }

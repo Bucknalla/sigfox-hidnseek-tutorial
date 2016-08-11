@@ -53,7 +53,6 @@ If you open the case of the HidnSeek (There are 4 plastic connectors around the 
 <p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/HidnSeek_Board.png" width="450"></p>
 
 Once the device has entered DFU mode, a red LED will flash rapidly for approximately 30 seconds. During this period of time, a new sketch may be uploaded to the device. If you miss this window, you will have to repeat the process for entering DFU mode.
-
 ## Detecting Movement and Transmitting Alert over SIGFOX
 
 This example shows how to use the HidnSeek library to detect movement on the device, counting the number of times the device has moved since the last transmission and send the data over the SIGFOX network.
@@ -64,15 +63,23 @@ This could be used as an alarm or a trigger based upon movement such as a door o
 
 *Please note - the use of isReady() is unideal as it is inefficient.*
 
+You can view the commented sketch at  
+
 ## Getting a GPS Fix and Transmitting Location/Timestamp over SIGFOX
 
 This example demonstrates how you can use the HidnSeek's GPS to broadcast the device's location at intervals of once an hour over the SIGFOX network. This sketch is a modification of the Firmware for the HidnSeek as much of the behaviour requires the related sketch functions for battery, GPS, etc. control.
 
-The sports mode and other additional functionality of the HidnSeek have been removed to streamline the sketch and make it easier to understand functionality.
+You will need to include the *def.h* file with your Arduino sketch as this contains many of the core commands needed to communicate with the GPS. This is pulled directly from the HidnSeek firmware so contains additional variable assignments for accelerometer, barometer functionality, etc.
+
+The sports mode and the additional low power functionality of the HidnSeek have been removed to streamline the sketch and make it easier to understand.
+
+You can view the commented sketch at  
 
 ### Checking Your Data over Serial
 
-In order to determine if the GPS data you are collecting is correct, you can use the device's serial port to communicate with a host machine. You will need to use a Serial to USB cable and connect it to the HidnSeek via the GND, RX, TX and 3.3 V connector pads.
+In order to determine if the GPS data you are collecting is correct, you can use the device's serial port to communicate with a host machine. You will need to use a Serial to USB cable and connect it to the HidnSeek via the GND, RX, TX and 3.3 V connector pads. In the picture below you can see the HidnSeek connected over a USB to Serial (FTDI Cable)
+
+<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/HidnSeek_Board.png" width="450"></p>
 
 ### Retrieving Data from the SIGFOX Cloud
 
