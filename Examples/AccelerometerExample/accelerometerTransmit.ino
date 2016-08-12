@@ -31,15 +31,6 @@ unsigned long previousMillis = 0;
 uint16_t counter = 0;
 unsigned long start;
 
-void setup() {
-    HidnSeek.initGPIO(false);
-    HidnSeek.setSupply(true);
-    Wire.begin();
-    accel.begin(false, ACCEL_MODE);
-    HidnSeek.begin();
-    start = millis();
-}
-
 bool accelStatus() { // Checks if Accelerometer has detected movement
     static int8_t x, y, z;
 
@@ -58,9 +49,16 @@ bool accelStatus() { // Checks if Accelerometer has detected movement
     return accelMove;
 }
 
-void loop(){ // Transmits the number of times the device has been moved since last Sigfox transmission
+void setup() {
+    HidnSeek.initGPIO(false);
+    HidnSeek.setSupply(true);
+    Wire.begin();
+    accel.begin(false, ACCEL_MODE);
+    HidnSeek.begin();
+    start = millis();
+}
 
-    HidnSeek.checkBattery(); // Shuts down power supply down if battery is < 3.7 V
+void loop(){ // Transmits the number of times the device has been moved since last Sigfox transmission
 
     unsigned long currentMillis = millis();
 
@@ -68,7 +66,6 @@ void loop(){ // Transmits the number of times the device has been moved since la
               previousMillis = currentMillis;
 
         if (accelStatus()) {
-          counter += 1;
           if (HidnSeek.isReady()) { // Checks network limit of Sigfox before transmitting the alert
             HidnSeek.send(&counter, sizeof(counter));
             counter = 0;
@@ -78,6 +75,7 @@ void loop(){ // Transmits the number of times the device has been moved since la
             delay(800);
           }
           else {
+             counter += 1;
             digitalWrite(bluLEDpin, HIGH);
             delay(200);
             digitalWrite(bluLEDpin, LOW);

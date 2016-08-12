@@ -14,7 +14,7 @@ This is a SIGFOX tutorial for getting started with the [HidnSeek GPS Locator](ht
 Using the SIGFOX network, the device can broadcast it's payload to the SIGFOX Cloud, where it can be interpreted by a user's server allowing for both Uplink and Downlink messages to be sent. As the network is currently undergoing global rollout, please check our [coverage map](http://www.sigfox.com/coverage) for details on availability in your region!
 
 ## Getting started
-This tutorial assumes that you are familiar with the [Arduino IDE](https://www.arduino.cc/en/Main/Software) and are using, at least version **1.6.4**.
+This tutorial assumes that you are familiar with the [Arduino IDE](https://www.arduino.cc/en/Main/Software) and are using, at least version **1.6.4**. This tutorial relies on recent features of the Arduino IDE so please update if you are running an earlier build.
 
 ### Setting Up
 
@@ -46,25 +46,80 @@ The driver will work with Windows XP through to Windows 10 (both 32 and 64 bit e
 
 #### Preparing the Board for Uploading
 
-In order to prepare the HidnSeek for the uploading of a sketch, **the board must be placed into DFU mode (Device Firmware Update)**.
+In order to prepare the HidnSeek for the uploading of a sketch, the board must be placed into **DFU mode (Device Firmware Update)**.
 
-If you open the case of the HidnSeek (There are 4 plastic connectors around the edge of the device), you will notice a bank of exposed connections. Short the connections labelled R & G and the device will enter DFU mode.
+If you open the case of the HidnSeek (There are 4 plastic connectors around the edge of the device), you will notice a bank of exposed connections. **Short the connections pads** labelled R & G and the device will enter DFU mode. You can use a wire to short the pads.
 
 <p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/HidnSeek_Board.png" width="450"></p>
 
-Once the device has entered DFU mode, a red LED will flash rapidly for approximately 30 seconds. During this period of time, a new sketch may be uploaded to the device. If you miss this window, you will have to repeat the process for entering DFU mode.
+Once the device has entered DFU mode, a red LED will flash rapidly for approximately 30 seconds. During this period of time, a new sketch may be uploaded to the device. If you miss this window, you will have to repeat the process.
 
 ## Detecting Movement and Transmitting Alert over SIGFOX
 
 This example shows how to use the HidnSeek library to detect movement on the device, counting the number of times the device has moved since the last transmission and send the data over the SIGFOX network.
 
+This could be used as an alarm or a trigger based upon movement such as a door or window opening.
+
 *The device is limited to transmit a maximum of approximately 6 times an hour (140~ messages per day) based upon the limitations of the EU Regulations (ETSI 300-220) on the unlicensed 868MHz frequency.*
 
-This could be used as an alarm or a trigger based upon movement such as a door or window opening.
+The first important function in the sketch, is the polling of the accelerometer status, *accelStatus()*. This is needed to determine if the accelerometer has detected moved.
+
+```arduino
+bool accelStatus() { // Checks if Accelerometer has detected movement
+    static int8_t x, y, z;
+
+    boolean accelMove = false;
+    byte error = accel.update();
+
+    if (error != 0) accelMove = true;
+    else {
+    accelMove = ((uint8_t)(abs((int8_t)(accel.getX() - x))) > SENSITIVITY) ? true :
+                ((uint8_t)(abs((int8_t)(accel.getY() - y))) > SENSITIVITY) ? true :
+                ((uint8_t)(abs((int8_t)(accel.getZ() - z))) > SENSITIVITY) ? true : false;
+    x = accel.getX();
+    y = accel.getY();
+    z = accel.getZ();
+    }
+    return accelMove;
+}
+```
+
+The essential part of the of the sketch is the 2-bit transmission with the SIGFOX message. For this, it is easier to call upon the HidnSeek library to access the SIGFOX commands.
+
+```arduino
+void loop(){ // Transmits the number of times the device has been moved since last Sigfox transmission
+
+    unsigned long currentMillis = millis();
+
+    if (currentMillis - previousMillis >= 200) {
+              previousMillis = currentMillis;
+
+        if (accelStatus()) {
+          if (HidnSeek.isReady()) { // Checks network limit of Sigfox before transmitting the alert
+            HidnSeek.send(&counter, sizeof(counter));
+            counter = 0;
+            digitalWrite(redLEDpin, HIGH);
+            delay(200);
+            digitalWrite(redLEDpin, LOW);
+            delay(800);
+          }
+          else {
+             counter += 1;
+            digitalWrite(bluLEDpin, HIGH);
+            delay(200);
+            digitalWrite(bluLEDpin, LOW);
+            delay(800);
+          }
+        }
+
+    }
+}
+```
+
 
 *Please note - the use of isReady() is unideal as it is inefficient as its wastes clock cycles. An ideal solution would be to use interrupts. See the HidnSeek Firmware for an example of how to place the device into a low power state whilst waiting.*
 
-You can view the commented sketch [here](https://github.com/Bucknalla/Sigfox-Hidnseek-Tutorial/blob/master/Examples/GPSExample/GPSTransmit.ino).  
+You can view the complete sketch [here](https://github.com/Bucknalla/Sigfox-Hidnseek-Tutorial/blob/master/Examples/GPSExample/GPSTransmit.ino).  
 
 ## Getting a GPS Fix and Transmitting Location/Timestamp over SIGFOX
 
@@ -72,9 +127,121 @@ This example demonstrates how you can use the HidnSeek's GPS to broadcast the de
 
 You will need to include the *def.h* file with your Arduino sketch as this contains many of the core commands needed to communicate with the GPS. This is pulled directly from the HidnSeek firmware so contains additional variable assignments for accelerometer, barometer functionality, etc.
 
-*The sports mode and the additional low power functionality of the HidnSeek have been removed to streamline the sketch and make it easier to understand.*
+The GPS on the HidnSeek is addressable via a UART connection to pins 0 and 1 on the ATMega328p. This means that a serial connection must be opened in order to send commands to the GPS. The following code snippet shows the function that allows this behaviour.
 
-You can view the commented sketch [here](https://github.com/Bucknalla/Sigfox-Hidnseek-Tutorial/blob/master/Examples/AccelerometerExample/accelerometerTransmit.ino).  
+```arduino
+void gpsCmd (PGM_P s) { // Function to control sending commands directly to the GPS
+  int XOR = 0;
+  char c;
+  while ((c = pgm_read_byte(s++)) != 0) {
+    Serial.print(c);
+    if (c == '*') break;
+    if (c != '$') XOR ^= c;
+  }
+  if (XOR < 0x10) Serial.print("0");
+  Serial.println(XOR, HEX);
+}
+```
+
+An example of one of these commands is used to wake up the GPS.
+
+```arduino
+#define PMTK_AWAKE   "$PMTK010,001*"
+```
+
+It is also important that all of the components are initalised correctly for use; the GPS requires specific instructions to operate in the mode we desire, NMEA and with a 1 Hz update rate. Initially the Serial port is checked for activity and if this returns true, the GPS modes are set.
+
+```arduino
+bool gpsInit() { // Checks the state of the serial port and set the GPS to output mode to 1 Hz
+  boolean GPSready = false;
+  digitalWrite(rstPin, HIGH);
+  unsigned long startloop = millis();
+
+  while ((uint16_t) (millis() - startloop) < 5000 ) {
+    if (Serial.available() > 0 && Serial.read() == '*') {
+      GPSready = true;
+      break;
+    }
+    delay(100);
+  }
+  if (GPSready) {
+    gpsCmd(PSTR(PMTK_SET_NMEA_OUTPUT));       // Sets the GPS to NMEA Output Mode
+    gpsCmd(PSTR(PMTK_SET_NMEA_UPDATE_1HZ));   // 1 Hz update rate
+  } else digitalWrite(rstPin, LOW);
+  return GPSready;
+}
+```
+
+The next function to review is gpsProcess(). This is where most of the communication between the GPS and the ATMega328p occurs. While this is a relatively large function, the important components are the process of reading from the GPS and parsing the data into a format in which can be sent in a SIGFOX message.
+
+```arduino
+boolean newGpsData = false;
+boolean newSerialData = false;
+float distance;
+unsigned long start = millis();
+unsigned int waitime = 2000;
+
+while ((uint16_t) (millis() - start) < waitime)   // Parse GPS data for 2 second
+{
+  if (Serial.available() > 0) {
+    newSerialData = true;
+    waitime = 100;
+    start = millis();
+    blueLEDon;
+  }
+  while (Serial.available())
+  {
+    char c = Serial.read();
+    // New valid NMEA data available
+    if (gps.encode(c))
+    {
+      newGpsData = true;
+    }
+  }
+}
+```
+
+The retrieved data is then parsed into the separate variables to allow it to be used in the creation of the SIGFOX payload. noSat is used to store 
+
+```arduino
+if (newGpsData) { // Compute GPS data
+    gps.f_get_position(&p.lat, &p.lon, &fix_age);
+    if (fix_age == TinyGPS::GPS_INVALID_AGE || fix_age > 5000) fix_age = 1024;
+    sat = gps.satellites() == TinyGPS::GPS_INVALID_SATELLITES ? 0 : gps.satellites();
+    alt = abs(round(gps.f_altitude()));
+    spd = round(gps.f_speed_kmph());
+
+    distance = 1000;
+    if (fix_age >> 9) {
+        newGpsData = false; // No a real fix detected
+        p.lat = previous_lat;
+        p.lon = previous_lon;
+        serialString(PSTR("recover lat="));
+        Serial.print(p.lat, 7);
+        serialString(PSTR(", lon="));
+        Serial.println(p.lon, 7);
+    } else if (abs(p.lat) > 2 && abs(p.lon) > 2) distance = gps.distance_between(p.lat, p.lon, previous_lat, previous_lon);
+
+    if (newGpsData && distance < 5 && syncSat > 20) {
+        syncSat = 255;
+    }
+
+    if (newGpsData) {
+        if (sat < 4 || (abs(p.lat) < 2 && abs(p.lon) < 2)) noSat++;
+        else {
+            noSat = 0;
+            syncSat++; // else syncSat = 0; // increase global variable
+        }
+        if (sat > 7) syncSat ++;
+    }
+    else noSat++;
+}
+else noSat++;
+```
+
+*The sports mode and the additional low power functionality of the HidnSeek have been removed to streamline the sketch and make it easier to understand. Take a look at the device firmware to see how these features are utilised.*
+
+You can view the complete sketch [here](https://github.com/Bucknalla/Sigfox-Hidnseek-Tutorial/blob/master/Examples/AccelerometerExample/accelerometerTransmit.ino).  
 
 ### Checking Your Data over Serial
 
@@ -87,6 +254,8 @@ In the picture below you can see the HidnSeek connected over a USB to Serial cab
 <p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/hidnseek_3.JPG" width="400"></p>
 
 In this specific case the USB to Serial device is using a CP2102 UART to USB Chip from Silabs.
+
+*It is also important to note that the GPS shares the same UART pathway as the external head, so when the ATMega328p addresses the GPS, these commands will be seen by the USB to Serial device.*
 
 ### Retrieving Data from the SIGFOX Cloud
 

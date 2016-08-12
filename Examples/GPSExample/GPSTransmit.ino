@@ -1,7 +1,7 @@
 #include <HidnSeek.h>
 #include <SoftwareSerial.h>
 #include <TinyGPS.h>
-#include "definition.h" // Required for GPS Commands, etc.
+#include "def.h" // Required for GPS Commands, etc.
 
 HidnSeek HidnSeek(txSigfox, rxSigfox);
 
@@ -18,7 +18,7 @@ void initGPIO() // Required to initialise the battery and other GPIO
   DDRD  = DIGITAL_OUTPUT & 0xff;
 }
 
-void serialString (PGM_P s) { // Used to send commands to the GPS
+void serialString (PGM_P s) { // Used to print to more efficiently print to serial
   char c;
   while ((c = pgm_read_byte(s++)) != 0)
     Serial.print(c);
@@ -90,7 +90,7 @@ bool gpsProcess() { // Main function for collating and preparing GPS data
   // 12 octets = 96 bits payload
   // lat: 32, lon: 32, alt: 13 , spd: 7, cap: 2, bat: 7, mode: 3 (0-3 sat view, more is MSG)
   // lat: 32, lon: 32, alt:0-8191m, spd:0-127Km/h, bat:0-100%, mode:0-7, cap: N/E/S/W
-  // int is 16 bits, float is 32 bits. All little endian
+  // int is 16 bits, float is 32 bits. All little endian.
 
   gps.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &fix_age);
 
@@ -111,7 +111,7 @@ bool gpsProcess() { // Main function for collating and preparing GPS data
       serialString(PSTR(", lon="));
       Serial.println(p.lon, 7);
     } else if (abs(p.lat) > 2 && abs(p.lon) > 2) distance = gps.distance_between(p.lat, p.lon, previous_lat, previous_lon);
-    if (newGpsData && distance < 5 && syncSat > 20 && forceSport == 0) {
+    if (newGpsData && distance < 5 && syncSat > 20) {
       syncSat = 255;
     }
 
