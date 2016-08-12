@@ -3,7 +3,7 @@
 # SIGFOX HidnSeek Tutorial
 This is a SIGFOX tutorial for getting started with the [HidnSeek GPS Locator](https://www.hidnseek.fr/). This is a device based upon the ATMega328p with features including:
 
-<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/Images/hidnseek.png" width="600"></p>
+<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/hidnseek.png" width="600"></p>
 
 * GPS Locality
 * 3 Axis Accelerometer
@@ -34,7 +34,7 @@ You will now need to install the board. You can do this by navigating to the **B
 
 Restart the Arduino IDE and check that the board has correctly installed.
 
-<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/Images/arduino_install.png" width="700"></p>
+<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/arduino_install.png" width="700"></p>
 
 #### Installing Drivers (Windows Only)
 
@@ -50,7 +50,7 @@ In order to prepare the HidnSeek for the uploading of a sketch, the board must b
 
 If you open the case of the HidnSeek (There are 4 plastic connectors around the edge of the device), you will notice a bank of exposed connections. **Short the connections pads** labelled R & G and the device will enter DFU mode. You can use a wire to short the pads.
 
-<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/Images/HidnSeek_Board.png" width="450"></p>
+<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/HidnSeek_Board.png" width="450"></p>
 
 Once the device has entered DFU mode, a red LED will flash rapidly for approximately 30 seconds. During this period of time, a new sketch may be uploaded to the device. If you miss this window, you will have to repeat the process.
 
@@ -247,11 +247,11 @@ You can view the complete sketch [here](https://github.com/Bucknalla/Sigfox-Hidn
 
 In order to determine if the GPS data you are collecting is correct, you can use the device's serial port to communicate with a host machine. You will need to use a Serial to USB cable and connect it to the HidnSeek via the GND, RX, TX and 3.3 V connector pads.
 
-<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/Images/hidnseek_2.JPG" width="400"></p>
+<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/hidnseek_2.JPG" width="400"></p>
 
 In the picture below you can see the HidnSeek connected over a USB to Serial cable. The device itself does not support onboard Serial over USB so an external device is required.
 
-<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/Images/hidnseek_3.JPG" width="400"></p>
+<p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/hidnseek_3.JPG" width="400"></p>
 
 In this specific case the USB to Serial device is using a CP2102 UART to USB Chip from Silabs.
 
