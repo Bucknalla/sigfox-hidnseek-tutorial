@@ -201,7 +201,7 @@ while ((uint16_t) (millis() - start) < waitime)   // Parse GPS data for 2 second
 }
 ```
 
-The retrieved data is then parsed into the separate variables to allow it to be used in the creation of the SIGFOX payload. noSat is used to store 
+The retrieved data is then parsed into the separate variables to allow it to be used in the creation of the SIGFOX payload. 
 
 ```arduino
 if (newGpsData) { // Compute GPS data
