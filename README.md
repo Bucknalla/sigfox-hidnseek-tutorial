@@ -92,7 +92,7 @@ void loop(){ // Transmits the number of times the device has been moved since la
     unsigned long currentMillis = millis();
 
     if (currentMillis - previousMillis >= 200) {
-              previousMillis = currentMillis;
+        previousMillis = currentMillis;
 
         if (accelStatus()) {
           if (HidnSeek.isReady()) { // Checks network limit of Sigfox before transmitting the alert
@@ -111,7 +111,6 @@ void loop(){ // Transmits the number of times the device has been moved since la
             delay(800);
           }
         }
-
     }
 }
 ```
@@ -257,11 +256,15 @@ In this specific case the USB to Serial device is using a CP2102 UART to USB Chi
 
 *It is also important to note that the GPS shares the same UART pathway as the external head, so when the ATMega328p addresses the GPS, these commands will be seen by the USB to Serial device.*
 
+### Registering a SIGFOX device
+
+In order to get your HidnSeek connected to the SIGFOX network and
+
 ### Retrieving Data from the SIGFOX Cloud
 
 This step is slightly more complicated as we're required to set up an server to communicate with the SIGFOX Cloud and to retrieve any of the messages sent by the HidnSeek.
 
-In the interest of existing tutorials/guides for managing SIGFOX callbacks, it would be useful to check out our [Talking Plant Tutorial](https://www.hackster.io/18194/sigfox-talking-plant-0d21bc?ref=platform&ref_id=7860_trending___&offset=0) where it's shown to you how to use node.js to host a server with the purpose of receiving sensor data.
+In the interest of existing tutorials/guides for managing SIGFOX callbacks, it would be useful to check out the [Talking Plant Tutorial](https://www.hackster.io/18194/sigfox-talking-plant-0d21bc?ref=platform&ref_id=7860_trending___&offset=0) where it's shown to you how to use node.js to host a server with the purpose of receiving sensor data.
 
 If you haven't already, you will need to activate the device at [backend.sigfox.com](https://backend.sigfox.com). This is our device/network management portal where you can set device callbacks, configure downlink messages, etc.
 
