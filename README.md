@@ -13,6 +13,8 @@ This is a SIGFOX tutorial for getting started with the [HidnSeek GPS Locator](ht
 
 Using the SIGFOX network, the device can broadcast it's payload to the SIGFOX Cloud, where it can be interpreted by a user's server allowing for both Uplink and Downlink messages to be sent. As the network is currently undergoing global rollout, please check our [coverage map](http://www.sigfox.com/coverage) for details on availability in your region!
 
+**This tutorial is aimed at those interested in using the HidnSeek as a development kit.**
+
 ## Getting started
 This tutorial assumes that you are familiar with the [Arduino IDE](https://www.arduino.cc/en/Main/Software) and are using, at least version **1.6.4**. This tutorial relies on recent features of the Arduino IDE so please update if you are running an earlier build.
 
@@ -53,6 +55,18 @@ If you open the case of the HidnSeek (There are 4 plastic connectors around the 
 <p align="center"><img src ="https://raw.githubusercontent.com/Bucknalla/Sigfox-Hidnseek-Tutorial/master/Resources/images/HidnSeek_Board.png" width="450"></p>
 
 Once the device has entered DFU mode, a red LED will flash rapidly for approximately 30 seconds. During this period of time, a new sketch may be uploaded to the device. If you miss this window, you will have to repeat the process.
+
+## Installing the Required Libraries
+
+In order to utilise the HidnSeek's various sensors, you will need to install the associated libraries. If you head to the following [link](https://github.com/Bucknalla/Sigfox-Hidnseek-Tutorial/blob/master/Examples/GPSExample/GPSTransmit.ino) you will find the libraries already zipped for you. Download the 5 different zipped folders and navigate to the Arduino library manager (**Sketch** -> **Include Library** -> **Add .ZIP Library**). Navigate to the location where you downloaded the files to and choose the .zip file for each library. You will have to repeat this for each library. You should see the following files -
+
+* **HidnSeek.zip**
+* **MMA8653.zip**
+* **Barometer.zip**
+* **LowPower.zip**
+* **TinyGPS.zip**
+
+*Note - You may need to re-zip the files if using OSX or another OS that automatically up-zips files for you*  
 
 ## Detecting Movement and Transmitting Alert over SIGFOX
 
@@ -256,9 +270,15 @@ In this specific case the USB to Serial device is using a CP2102 UART to USB Chi
 
 *It is also important to note that the GPS shares the same UART pathway as the external head, so when the ATMega328p addresses the GPS, these commands will be seen by the USB to Serial device.*
 
-### Registering a SIGFOX device
+### Registering/Activating a SIGFOX device
 
-In order to get your HidnSeek connected to the SIGFOX network and
+In order to get your HidnSeek connected to the SIGFOX network, you will need to navigate to [https://backend.sigfox.com/activate](https://backend.sigfox.com/activate) where you will find a selection of our partners who produce SIGFOX enabled Dev Kits. HidnSeek will be one of the available options. Select this option and then choose the SIGFOX Network Operator for your locale, e.g. VT Networks if you plan to use the device in Ireland.  
+
+Next you will be asked for the Device ID and PAC. You will be able to find these on the HidnSeek website when you initially set the device up. Entering the PAC number on the SIGFOX Backend will place the device into your control. Follow through the signup process, adding the required details.
+
+Once you've signed up and clicked subscribe, a SIGFOX Backend account will have been created for you. From here you will be able to view information about messages that are sent/received as well as device statistics about SNR (Sigal to Noise Ratio), number of base stations that picked up the message, etc.
+
+*Please note that the process of transferring the PAC from HidnSeek to your own account could take up to an hour.*
 
 ### Retrieving Data from the SIGFOX Cloud
 
@@ -266,7 +286,7 @@ This step is slightly more complicated as we're required to set up an server to 
 
 In the interest of existing tutorials/guides for managing SIGFOX callbacks, it would be useful to check out the [Talking Plant Tutorial](https://www.hackster.io/18194/sigfox-talking-plant-0d21bc?ref=platform&ref_id=7860_trending___&offset=0) where it's shown to you how to use node.js to host a server with the purpose of receiving sensor data.
 
-If you haven't already, you will need to activate the device at [backend.sigfox.com](https://backend.sigfox.com). This is our device/network management portal where you can set device callbacks, configure downlink messages, etc.
+You can configure device callbacks from the SIGFOX Backend.
 
 ### Learn More
 
