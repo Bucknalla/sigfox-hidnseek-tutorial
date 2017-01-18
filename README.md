@@ -56,7 +56,7 @@ If you open the case of the HidnSeek (There are 4 plastic connectors around the 
 
 Once the device has entered DFU mode, a red LED will flash rapidly for approximately 30 seconds. During this period of time, a new sketch may be uploaded to the device. If you miss this window, you will have to repeat the process.
 
-## Installing the Required Libraries
+## Installing the Libraries
 
 In order to utilise the HidnSeek's various sensors, you will need to install the associated libraries. If you head to the following [link](https://github.com/Bucknalla/Sigfox-Hidnseek-Tutorial/blob/master/Examples/GPSExample/GPSTransmit.ino) you will find the libraries already zipped for you. Download the 5 different zipped folders and navigate to the Arduino library manager (**Sketch** -> **Include Library** -> **Add .ZIP Library**). Navigate to the location where you downloaded the files to and choose the .zip file for each library. You will have to repeat this for each library. You should see the following files -
 
@@ -70,7 +70,7 @@ In order to utilise the HidnSeek's various sensors, you will need to install the
 
 ## Detecting Movement and Transmitting Alert over SIGFOX
 
-This example shows how to use the HidnSeek library to detect movement on the device, counting the number of times the device has moved since the last transmission and send the data over the SIGFOX network.
+This simple example shows how to use the HidnSeek library to detect movement on the device, counting the number of times the device has moved since the last transmission and send then data over the SIGFOX network.
 
 This could be used as an alarm or a trigger based upon movement such as a door or window opening.
 
@@ -128,7 +128,6 @@ void loop(){ // Transmits the number of times the device has been moved since la
     }
 }
 ```
-
 
 *Please note - the use of isReady() is unideal as it is inefficient as its wastes clock cycles. An ideal solution would be to use interrupts. See the HidnSeek Firmware for an example of how to place the device into a low power state whilst waiting.*
 
